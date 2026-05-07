@@ -1,15 +1,30 @@
-# rbac
+# RBAC Project (Prisma + MySQL + Bun)
 
-To install dependencies:
+## Setup Project
 
+### 1. Clone project
+```bash
+git clone https://github.com/Zulfikarnaen/RBAC_Project.git
+cd RBAC_Project
+```
+
+### 2. Install dependency
 ```bash
 bun install
 ```
 
-To run:
-
+###3. Tambah file .env
+Buat file .env di root project:
 ```bash
-bun run index.ts
+DATABASE_URL="mysql://avnadmin:PASSWORD@host:port/defaultdb?ssl-mode=REQUIRED"
 ```
 
-This project was created using `bun init` in bun v1.3.11. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+### 4. Generate Prisma Client
+```bash
+bunx prisma generate
+```
+
+### 5. Cek database (Prisma Studio)
+```bash
+bunx prisma studio
+```
