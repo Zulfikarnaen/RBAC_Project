@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",
+    "elysia": "^1.4.28",
     "jsonwebtoken": "^9.0.3"
   }
 }
