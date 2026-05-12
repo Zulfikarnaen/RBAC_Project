@@ -19,10 +19,16 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     }
   }, {
     body: t.Object({
-      username: t.String({ minLength: 3 }),
-      email: t.String({ format: "email" }),
-      password: t.String({ minLength: 6 }),
+      username: t.String({ minLength: 3, default: "superadmin" }),
+      email: t.String({ format: "email", default: "superadmin@test.com" }),
+      password: t.String({ minLength: 6, default: "Admin123!" }),
     }),
+    // Metadata OpenAPI untuk rute Register
+    detail: {
+      tags: ["Auth"],
+      summary: "Registrasi Pengguna Baru",
+      description: "Mendaftarkan pengguna baru ke dalam sistem. Endpoint ini memvalidasi email agar tidak duplikat dan melakukan hashing password secara otomatis.",
+    },
   })
 
   // POST /auth/login
@@ -36,7 +42,13 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     }
   }, {
     body: t.Object({
-      email: t.String({ format: "email" }),
-      password: t.String({ minLength: 6 }),
+      email: t.String({ format: "email", default: "superadmin@test.com" }),
+      password: t.String({ minLength: 6, default: "Admin123!" }),
     }),
+    // Metadata OpenAPI untuk rute Login
+    detail: {
+      tags: ["Auth"],
+      summary: "Login Pengguna",
+      description: "Melakukan autentikasi pengguna menggunakan email dan password. Mengembalikan data profil singkat beserta token JWT untuk mengakses rute terproteksi.",
+    },
   });
