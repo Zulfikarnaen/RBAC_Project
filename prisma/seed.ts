@@ -40,10 +40,31 @@ const ROLES = [
   },
 ];
 
-async function main() {
-  console.log("🌱 Memulai seeding data RBAC...\n");
+const USERS = [
+  {
+    username: "superadmin",
+    email: "superadmin@test.com",
+    password: "Admin123!",
+    role: "SUPERADMIN",
+  },
+  {
+    username: "admin",
+    email: "admin@test.com",
+    password: "Admin123!",
+    role: "ADMIN",
+  },
+  {
+    username: "user",
+    email: "user@test.com",
+    password: "User123!",
+    role: "USER",
+  },
+];
 
-  console.log("📋 Menyiapkan permissions...");
+export async function seed() {
+  console.log("Memulai seeding data RBAC...\n");
+
+  console.log("Menyiapkan permissions...");
   const createdPermissions: Record<string, string> = {};
 
   for (const perm of PERMISSIONS) {
@@ -53,10 +74,11 @@ async function main() {
       create: perm,
     });
     createdPermissions[result.name] = result.id;
-    console.log(`  ✓ ${result.name}`);
+    console.log(`  - ${result.name}`);
   }
 
-  console.log("\n👥 Menyiapkan roles dan mengassign permissions...");
+  console.log("\nMenyiapkan roles dan mengassign permissions...");
+  const createdRoles: Record<string, string> = {};
 
   for (const roleDef of ROLES) {
     const role = await db.role.upsert({
@@ -75,17 +97,56 @@ async function main() {
       });
     }
 
-    console.log(`  ✓ ${role.name} — ${roleDef.permissions.length} permissions`);
+    createdRoles[role.name] = role.id;
+    console.log(`  - ${role.name}: ${roleDef.permissions.length} permissions`);
   }
 
-  console.log("\n✅ Seeding selesai!");
+  console.log("\nMenyiapkan user demo dan assignment role...");
+
+  for (const userDef of USERS) {
+    const hashedPassword = await Bun.password.hash(userDef.password, {
+      algorithm: "bcrypt",
+      cost: 10,
+    });
+    const user = await db.user.upsert({
+      where: { email: userDef.email },
+      update: {
+        username: userDef.username,
+        password: hashedPassword,
+      },
+      create: {
+        username: userDef.username,
+        email: userDef.email,
+        password: hashedPassword,
+      },
+    });
+
+    const roleId = createdRoles[userDef.role];
+    if (!roleId) throw new Error(`Role ${userDef.role} tidak ditemukan saat seeding.`);
+
+    await db.userRole.upsert({
+      where: { userId_roleId: { userId: user.id, roleId } },
+      update: {},
+      create: { userId: user.id, roleId },
+    });
+
+    console.log(`  - ${user.email} -> ${userDef.role}`);
+  }
+
+  console.log("\nSeeding selesai!");
+  console.log("Akun demo:");
+  console.log("  superadmin@test.com / Admin123!");
+  console.log("  admin@test.com      / Admin123!");
+  console.log("  user@test.com       / User123!");
 }
 
-main()
-  .catch((e) => {
-    console.error("❌ Seeding gagal:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await db.$disconnect();
-  });
+if (import.meta.main) {
+  seed()
+    .catch((e) => {
+      console.error("Seeding gagal:", e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await db.$disconnect();
+    });
+}
