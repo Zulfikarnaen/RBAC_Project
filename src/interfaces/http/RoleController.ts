@@ -19,6 +19,12 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
       set.status = 500;
       return { success: false, message: (err as Error).message };
     }
+  }, {
+    detail: {
+      tags: ["Roles"],
+      summary: "Daftar Semua Role",
+      description: "Mengambil daftar seluruh role yang tersedia di dalam sistem RBAC tanpa menyertakan detail permission masing-masing.",
+    },
   })
 
   // GET /roles/:id
@@ -30,6 +36,15 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
       set.status = 404;
       return { success: false, message: (err as Error).message };
     }
+  }, {
+    params: t.Object({
+      id: t.String({ description: "UUID dari role yang ingin dicari" }),
+    }),
+    detail: {
+      tags: ["Roles"],
+      summary: "Detail Role Berdasarkan ID",
+      description: "Mengambil informasi detail sebuah role berdasarkan UUID, lengkap dengan struktur array permission yang tertaut pada role tersebut.",
+    },
   })
 
   // POST /roles
@@ -45,9 +60,14 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
   }, {
     beforeHandle: rbacGuard("CREATE_ROLE"),
     body: t.Object({
-      name: t.String({ minLength: 2 }),
-      description: t.Optional(t.String()),
+      name: t.String({ minLength: 2, default: "MANAGER" }),
+      description: t.Optional(t.String({ default: "Manajer divisi dengan akses terbatas" })),
     }),
+    detail: {
+      tags: ["Roles"],
+      summary: "Membuat Role Baru",
+      description: "Menambahkan entitas role baru ke dalam database. Endpoint ini diproteksi dan memerlukan header Authorization berisikan Bearer Token dengan hak akses CREATE_ROLE.",
+    },
   })
 
   // PUT /roles/:id
@@ -61,10 +81,18 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
     }
   }, {
     beforeHandle: rbacGuard("UPDATE_ROLE"),
-    body: t.Object({
-      name: t.Optional(t.String({ minLength: 2 })),
-      description: t.Optional(t.String()),
+    params: t.Object({
+      id: t.String({ description: "UUID dari role yang akan diperbarui" }),
     }),
+    body: t.Object({
+      name: t.Optional(t.String({ minLength: 2, default: "MANAGER_UPDATED" })),
+      description: t.Optional(t.String({ default: "Deskripsi role hasil pembaruan" })),
+    }),
+    detail: {
+      tags: ["Roles"],
+      summary: "Memperbarui Data Role",
+      description: "Mengubah atribut nama atau deskripsi dari role yang sudah ada. Membutuhkan izin UPDATE_ROLE.",
+    },
   })
 
   // DELETE /roles/:id
@@ -78,9 +106,17 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
     }
   }, {
     beforeHandle: rbacGuard("DELETE_ROLE"),
+    params: t.Object({
+      id: t.String({ description: "UUID dari role yang akan dihapus" }),
+    }),
+    detail: {
+      tags: ["Roles"],
+      summary: "Menghapus Role",
+      description: "Menghapus entitas role dari database secara permanen. Efek kaskade (cascade) akan mencabut penugasan role ini dari user yang memilikinya.",
+    },
   })
 
-  // POST /roles/:id/permissions — assign permission ke role
+  // POST /roles/:id/permissions
   .post("/:id/permissions", async ({ params, body, set }) => {
     try {
       await roleUsecase.assignPermission(params.id, body.permissionId);
@@ -91,10 +127,20 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
     }
   }, {
     beforeHandle: rbacGuard("ASSIGN_PERMISSION"),
-    body: t.Object({ permissionId: t.String() }),
+    params: t.Object({
+      id: t.String({ description: "UUID dari role induk" }),
+    }),
+    body: t.Object({
+      permissionId: t.String({ description: "UUID dari permission yang akan ditautkan" }),
+    }),
+    detail: {
+      tags: ["Roles"],
+      summary: "Menautkan Permission ke Role",
+      description: "Memberikan sebuah permission spesifik kepada suatu role dengan menambahkan data relasi pada tabel pivot RolePermission.",
+    },
   })
 
-  // DELETE /roles/:id/permissions/:permissionId — revoke permission dari role
+  // DELETE /roles/:id/permissions/:permissionId
   .delete("/:id/permissions/:permissionId", async ({ params, set }) => {
     try {
       await roleUsecase.revokePermission(params.id, params.permissionId);
@@ -105,4 +151,13 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
     }
   }, {
     beforeHandle: rbacGuard("ASSIGN_PERMISSION"),
+    params: t.Object({
+      id: t.String({ description: "UUID dari role induk" }),
+      permissionId: t.String({ description: "UUID dari permission yang akan dicabut" }),
+    }),
+    detail: {
+      tags: ["Roles"],
+      summary: "Mencabut Permission dari Role",
+      description: "Menghapus tautan relasi antara role dan permission dari tabel pivot. Membutuhkan izin akses ASSIGN_PERMISSION.",
+    },
   });
