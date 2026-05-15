@@ -6,18 +6,41 @@ interface AuthActions {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState & AuthActions>((set) => ({
-  user: null,
-  token: localStorage.getItem("token"),
-  isAuthenticated: !!localStorage.getItem("token"),
+export const useAuthStore = create<AuthState & AuthActions>((set) => {
+  // Fungsi helper untuk mengambil user dengan aman
+  const getInitialUser = (): User | null => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      if (!savedUser) return null;
+      return JSON.parse(savedUser);
+    } catch (error) {
+      console.error("Gagal parse data user dari localStorage:", error);
+      localStorage.removeItem("user"); // Hapus jika datanya rusak
+      return null;
+    }
+  };
 
-  login: (user, token) => {
-    localStorage.setItem("token", token);
-    set({ user, token, isAuthenticated: true });
-  },
+  const savedToken = localStorage.getItem("token");
 
-  logout: () => {
-    localStorage.removeItem("token");
-    set({ user: null, token: null, isAuthenticated: false });
-  },
-}));
+  return {
+    user: getInitialUser(),
+    token: savedToken,
+    isAuthenticated: !!savedToken,
+
+    login: (user, token) => {
+      try {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        set({ user, token, isAuthenticated: true });
+      } catch (error) {
+        console.error("Gagal menyimpan data login:", error);
+      }
+    },
+
+    logout: () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      set({ user: null, token: null, isAuthenticated: false });
+    },
+  };
+});
