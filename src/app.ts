@@ -1,11 +1,13 @@
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
+import { cors } from "@elysiajs/cors";
 import { authRoutes } from "./interfaces/http/AuthController";
 import { roleRoutes } from "./interfaces/http/RoleController";
 import { permissionRoutes, userRoleRoutes } from "./interfaces/http/PermissionController";
 
 export function createApp() {
   return new Elysia()
+    .use(cors())
     .use(
       swagger({
         path: "/swagger",
