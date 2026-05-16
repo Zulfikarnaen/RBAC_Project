@@ -1,5 +1,5 @@
 // src/application/usecases/AuthUsecase.ts
-import type { IUserRepository } from "../../domain/repositories/IUserRepository";
+import type { Isitory } from "../../domain/repositories/IUserRepository";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "rahasia_enterprise_default";
@@ -39,8 +39,8 @@ export class AuthUsecase {
   async login(data: any) {
     const { email, password } = data;
 
-    // 1. Identifikasi pengguna
-    const user = await this.userRepository.findByEmail(email);
+    // 1. Identifikasi pengguna dengan Role & Permission (Menggunakan method baru)
+    const user = await this.userRepository.findByEmailWithRoles(email);
     if (!user) {
       throw new Error("Kredensial tidak valid.");
     }
@@ -58,12 +58,24 @@ export class AuthUsecase {
       { expiresIn: "1d" } // Durasi kedaluwarsa token standar enterprise
     );
 
+    // 4. Ekstrak & Flatten data Roles dan Permissions dari database Prisma
+    // Karena relasinya bertingkat (User -> UserRole -> Role -> RolePermission -> Permission), 
+    // kita petakan (map) nilainya menjadi array string/object yang bersih untuk Frontend.
+    const roles = user.roles.map((ur: any) => ur.role.name);
+    
+    const permissions = user.roles.flatMap((ur: any) => 
+      ur.role.permissions.map((rp: any) => rp.permission.name)
+    );
+
+    // 5. Kembalikan response lengkap sesuai kebutuhan frontend
     return {
       token,
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
+        roles,        
+        permissions,  
       },
     };
   }

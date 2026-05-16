@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "bun --watch index.ts",
     "start": "bun index.ts",
+    "gen": "DATABASE_URL=\"mysql://avnadmin:AVNS_nYGWUQ2e8YKHr1ut_vu@rbac-mysql-rbac.k.aivencloud.com:11409/defaultdb?ssl-mode=REQUIRED\" bunx prisma generate",
     "seed": "bun prisma/seed.ts",
     "test": "bun test"
   },
