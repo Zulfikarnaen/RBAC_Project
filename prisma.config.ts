@@ -11,6 +11,6 @@ export default defineConfig({
   },
   engine: "classic",
   datasource: {
-    url: env("DATABASE_URL"),
+    url: "mysql://avnadmin:AVNS_nYGWUQ2e8YKHr1ut_vu@rbac-mysql-rbac.k.aivencloud.com:11409/defaultdb?ssl-mode=REQUIRED"
   },
 });
