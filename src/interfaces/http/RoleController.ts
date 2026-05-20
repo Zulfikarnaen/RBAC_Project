@@ -116,6 +116,34 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
     },
   })
 
+  // POST /roles/permissions
+  .post("/permissions", async ({ body, set }) => {
+    try {
+      await roleUsecase.assignPermission(body.roleId, body.permissionId);
+      return { success: true, message: "Permission berhasil ditambahkan ke role." };
+    } catch (err: unknown) {
+      set.status = 400;
+      return { success: false, message: (err as Error).message };
+    }
+  }, {
+    beforeHandle: rbacGuard("ASSIGN_PERMISSION"),
+    body: t.Object({
+      roleId: t.String({
+        description: "UUID role yang akan diberi permission. Ambil dari response GET /roles.",
+        default: "8140d0f3-de5f-4100-ac2d-c4ef40b689d0",
+      }),
+      permissionId: t.String({
+        description: "UUID permission yang akan ditautkan. Ambil dari response GET /permissions.",
+        default: "03cd64f4-dcd7-4e5c-8bce-07fa9f84e9fb",
+      }),
+    }),
+    detail: {
+      tags: ["Roles"],
+      summary: "Menautkan Permission ke Role melalui Body",
+      description: "Endpoint alternatif tanpa path parameter. Isi roleId dan permissionId langsung di request body.",
+    },
+  })
+
   // POST /roles/:id/permissions
   .post("/:id/permissions", async ({ params, body, set }) => {
     try {

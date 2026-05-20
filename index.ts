@@ -17,6 +17,7 @@ ROLES
   POST   /roles                         [CREATE_ROLE]
   PUT    /roles/:id                     [UPDATE_ROLE]
   DELETE /roles/:id                     [DELETE_ROLE]
+  POST   /roles/permissions             [ASSIGN_PERMISSION]
   POST   /roles/:id/permissions         [ASSIGN_PERMISSION]
   DELETE /roles/:id/permissions/:permId [ASSIGN_PERMISSION]
 
