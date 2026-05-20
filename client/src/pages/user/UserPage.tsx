@@ -1,18 +1,18 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import {
   getPrimaryRole,
   normalizePermissions,
   normalizeRoles,
-} from "@/utils/authRole";
+} from "@/utils/auth-role";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
   rbacService,
   type PermissionRecord,
   type RoleRecord,
-} from "@/services/rbacService";
+} from "@/services/rbac-service";
 import type { Permission } from "@/types/auth.types";
 
 type Notice = {

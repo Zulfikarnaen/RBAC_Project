@@ -1,6 +1,6 @@
 import { db } from "../prisma-client";
-import type { IRoleRepository } from "../../../domain/repositories/IRoleRepository";
-import type { Role, RoleWithPermissions } from "../../../domain/entities/Role";
+import type { IRoleRepository } from "../../../domain/repositories/role-repository";
+import type { Role, RoleWithPermissions } from "../../../domain/entities/role.entity";
 
 export class PrismaRoleRepository implements IRoleRepository {
 

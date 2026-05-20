@@ -1,6 +1,6 @@
-import type { IRoleRepository } from "../../domain/repositories/IRoleRepository";
-import type { IPermissionRepository } from "../../domain/repositories/IPermissionRepository";
-import type { Role, RoleWithPermissions } from "../../domain/entities/Role";
+import type { IRoleRepository } from "../../domain/repositories/role-repository";
+import type { IPermissionRepository } from "../../domain/repositories/permission-repository";
+import type { Role, RoleWithPermissions } from "../../domain/entities/role.entity";
 
 export class RoleUsecase {
   constructor(

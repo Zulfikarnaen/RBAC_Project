@@ -1,7 +1,7 @@
-// src/store/authStore.ts
+// src/store/auth-store.ts
 import { create } from "zustand";
 import type { User, AuthState } from "@/types/auth.types";
-import { normalizePermissions, normalizeRoles } from "@/utils/authRole";
+import { normalizePermissions, normalizeRoles } from "@/utils/auth-role";
 
 interface AuthActions {
   login: (user: User, token: string) => void;

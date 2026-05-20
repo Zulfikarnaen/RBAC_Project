@@ -1,4 +1,4 @@
-import type { Permission } from "../entities/Role";
+import type { Permission } from "../entities/role.entity";
 
 export interface IPermissionRepository {
   findAll(): Promise<Permission[]>;

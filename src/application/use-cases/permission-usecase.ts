@@ -1,5 +1,5 @@
-import type { IPermissionRepository } from "../../domain/repositories/IPermissionRepository";
-import type { Permission } from "../../domain/entities/Role";
+import type { IPermissionRepository } from "../../domain/repositories/permission-repository";
+import type { Permission } from "../../domain/entities/role.entity";
 
 export class PermissionUsecase {
   constructor(private readonly permissionRepo: IPermissionRepository) {}

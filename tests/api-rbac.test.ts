@@ -17,7 +17,7 @@ async function jsonRequest(path: string, init: RequestInit = {}) {
       headers,
     })
   );
-  const body = await response.json();
+  const body = await response.json() as any;
   return { response, body };
 }
 

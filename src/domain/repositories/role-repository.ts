@@ -1,4 +1,4 @@
-import type { Role, RoleWithPermissions } from "../entities/Role";
+import type { Role, RoleWithPermissions } from "../entities/role.entity";
 
 export interface IRoleRepository {
   findAll(): Promise<Role[]>;

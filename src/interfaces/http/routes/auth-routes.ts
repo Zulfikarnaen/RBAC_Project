@@ -1,21 +1,17 @@
 import { Elysia, t } from "elysia";
-import { AuthUsecase } from "../../application/usecases/AuthUsecase";
-import { PrismaUserRepository } from "../../infrastructure/database/repositories/PrismaUserRepository";
+import { AuthUsecase } from "../../../application/use-cases/auth-usecase";
+import { createdDataResponse, dataResponse, errorResponse } from "../responses/http-response";
 
-const userRepo = new PrismaUserRepository();
-const authUsecase = new AuthUsecase(userRepo);
-
-export const authRoutes = new Elysia({ prefix: "/auth" })
+export function createAuthRoutes(authUsecase: AuthUsecase) {
+  return new Elysia({ prefix: "/auth" })
 
   // POST /auth/register
   .post("/register", async ({ body, set }) => {
     try {
       const user = await authUsecase.register(body);
-      set.status = 201;
-      return { success: true, data: user };
+      return createdDataResponse(set, user);
     } catch (err: unknown) {
-      set.status = 400;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 400, err);
     }
   }, {
     body: t.Object({
@@ -35,10 +31,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   .post("/login", async ({ body, set }) => {
     try {
       const result = await authUsecase.login(body);
-      return { success: true, data: result };
+      return dataResponse(result);
     } catch (err: unknown) {
-      set.status = 401;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 401, err);
     }
   }, {
     body: t.Object({
@@ -52,3 +47,4 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       description: "Melakukan autentikasi pengguna menggunakan email dan password. Mengembalikan data profil singkat beserta token JWT untuk mengakses rute terproteksi.",
     },
   });
+}

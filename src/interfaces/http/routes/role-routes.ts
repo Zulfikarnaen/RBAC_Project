@@ -1,23 +1,18 @@
 import { Elysia, t } from "elysia";
-import { RoleUsecase } from "../../application/usecases/RoleUsecase";
-import { PrismaRoleRepository } from "../../infrastructure/database/repositories/PrismaRoleRepository";
-import { PrismaPermissionRepository } from "../../infrastructure/database/repositories/PrismaPermissionRepository";
-import { rbacGuard } from "../middleware/RBACMiddleware";
+import { RoleUsecase } from "../../../application/use-cases/role-usecase";
+import { rbacGuard } from "../middleware/rbac-middleware";
+import { createdDataResponse, dataResponse, errorResponse, messageResponse } from "../responses/http-response";
 
-const roleRepo = new PrismaRoleRepository();
-const permissionRepo = new PrismaPermissionRepository();
-const roleUsecase = new RoleUsecase(roleRepo, permissionRepo);
-
-export const roleRoutes = new Elysia({ prefix: "/roles" })
+export function createRoleRoutes(roleUsecase: RoleUsecase) {
+  return new Elysia({ prefix: "/roles" })
 
   // GET /roles
   .get("/", async ({ set }) => {
     try {
       const roles = await roleUsecase.getAllRoles();
-      return { success: true, data: roles };
+      return dataResponse(roles);
     } catch (err: unknown) {
-      set.status = 500;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 500, err);
     }
   }, {
     detail: {
@@ -31,10 +26,9 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
   .get("/:id", async ({ params, set }) => {
     try {
       const role = await roleUsecase.getRoleById(params.id);
-      return { success: true, data: role };
+      return dataResponse(role);
     } catch (err: unknown) {
-      set.status = 404;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 404, err);
     }
   }, {
     params: t.Object({
@@ -51,11 +45,9 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
   .post("/", async ({ body, set }) => {
     try {
       const role = await roleUsecase.createRole(body);
-      set.status = 201;
-      return { success: true, data: role };
+      return createdDataResponse(set, role);
     } catch (err: unknown) {
-      set.status = 400;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 400, err);
     }
   }, {
     beforeHandle: rbacGuard("CREATE_ROLE"),
@@ -74,10 +66,9 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
   .put("/:id", async ({ params, body, set }) => {
     try {
       const role = await roleUsecase.updateRole(params.id, body);
-      return { success: true, data: role };
+      return dataResponse(role);
     } catch (err: unknown) {
-      set.status = 400;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 400, err);
     }
   }, {
     beforeHandle: rbacGuard("UPDATE_ROLE"),
@@ -99,10 +90,9 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
   .delete("/:id", async ({ params, set }) => {
     try {
       await roleUsecase.deleteRole(params.id);
-      return { success: true, message: "Role berhasil dihapus." };
+      return messageResponse("Role berhasil dihapus.");
     } catch (err: unknown) {
-      set.status = 404;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 404, err);
     }
   }, {
     beforeHandle: rbacGuard("DELETE_ROLE"),
@@ -116,14 +106,40 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
     },
   })
 
+  // POST /roles/permissions
+  .post("/permissions", async ({ body, set }) => {
+    try {
+      await roleUsecase.assignPermission(body.roleId, body.permissionId);
+      return messageResponse("Permission berhasil ditambahkan ke role.");
+    } catch (err: unknown) {
+      return errorResponse(set, 400, err);
+    }
+  }, {
+    beforeHandle: rbacGuard("ASSIGN_PERMISSION"),
+    body: t.Object({
+      roleId: t.String({
+        description: "UUID role yang akan diberi permission. Ambil dari response GET /roles.",
+        default: "8140d0f3-de5f-4100-ac2d-c4ef40b689d0",
+      }),
+      permissionId: t.String({
+        description: "UUID permission yang akan ditautkan. Ambil dari response GET /permissions.",
+        default: "03cd64f4-dcd7-4e5c-8bce-07fa9f84e9fb",
+      }),
+    }),
+    detail: {
+      tags: ["Roles"],
+      summary: "Menautkan Permission ke Role melalui Body",
+      description: "Endpoint alternatif tanpa path parameter. Isi roleId dan permissionId langsung di request body.",
+    },
+  })
+
   // POST /roles/:id/permissions
   .post("/:id/permissions", async ({ params, body, set }) => {
     try {
       await roleUsecase.assignPermission(params.id, body.permissionId);
-      return { success: true, message: "Permission berhasil ditambahkan ke role." };
+      return messageResponse("Permission berhasil ditambahkan ke role.");
     } catch (err: unknown) {
-      set.status = 400;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 400, err);
     }
   }, {
     beforeHandle: rbacGuard("ASSIGN_PERMISSION"),
@@ -144,10 +160,9 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
   .delete("/:id/permissions/:permissionId", async ({ params, set }) => {
     try {
       await roleUsecase.revokePermission(params.id, params.permissionId);
-      return { success: true, message: "Permission berhasil dicabut dari role." };
+      return messageResponse("Permission berhasil dicabut dari role.");
     } catch (err: unknown) {
-      set.status = 400;
-      return { success: false, message: (err as Error).message };
+      return errorResponse(set, 400, err);
     }
   }, {
     beforeHandle: rbacGuard("ASSIGN_PERMISSION"),
@@ -161,3 +176,4 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
       description: "Menghapus tautan relasi antara role dan permission dari tabel pivot. Membutuhkan izin akses ASSIGN_PERMISSION.",
     },
   });
+}

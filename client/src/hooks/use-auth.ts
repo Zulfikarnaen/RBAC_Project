@@ -1,6 +1,6 @@
-import { useAuthStore } from "@/store/authStore";
-import { authService } from "@/services/authService";
-import { normalizePermissions, normalizeRoles } from "@/utils/authRole";
+import { useAuthStore } from "@/store/auth-store";
+import { authService } from "@/services/auth-service";
+import { normalizePermissions, normalizeRoles } from "@/utils/auth-role";
 import type { User } from "@/types/auth.types";
 
 export function useAuth() {

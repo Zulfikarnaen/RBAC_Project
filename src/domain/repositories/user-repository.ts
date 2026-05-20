@@ -1,4 +1,4 @@
-// src/domain/repositories/IUserRepository.ts
+// src/domain/repositories/user-repository.ts
 import type { User } from "@prisma/client";
 
 // Tipe untuk User lengkap beserta relasi roles dan permissions

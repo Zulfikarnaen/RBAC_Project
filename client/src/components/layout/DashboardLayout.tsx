@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { getPrimaryRole } from "@/utils/authRole";
+import { useAuth } from "@/hooks/use-auth";
+import { getPrimaryRole } from "@/utils/auth-role";
 
 export const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { user, handleLogout } = useAuth();

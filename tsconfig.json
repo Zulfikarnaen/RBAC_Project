@@ -26,5 +26,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "include": ["index.ts", "src/**/*.ts", "tests/**/*.ts", "prisma/**/*.ts"],
+  "exclude": ["client", "node_modules"]
 }
