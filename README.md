@@ -28,3 +28,4 @@ bunx prisma generate
 ```bash
 bunx prisma studio
 ```
+##
