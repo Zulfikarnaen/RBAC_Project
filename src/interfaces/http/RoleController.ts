@@ -128,15 +128,21 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
   }, {
     beforeHandle: rbacGuard("ASSIGN_PERMISSION"),
     params: t.Object({
-      id: t.String({ description: "UUID dari role induk" }),
+      id: t.String({
+        description: "UUID role yang akan diberi permission. Ambil dari response GET /roles.",
+        default: "8140d0f3-de5f-4100-ac2d-c4ef40b689d0",
+      }),
     }),
     body: t.Object({
-      permissionId: t.String({ description: "UUID dari permission yang akan ditautkan" }),
+      permissionId: t.String({
+        description: "UUID permission yang akan ditautkan. Ambil dari response GET /permissions.",
+        default: "03cd64f4-dcd7-4e5c-8bce-07fa9f84e9fb",
+      }),
     }),
     detail: {
       tags: ["Roles"],
       summary: "Menautkan Permission ke Role",
-      description: "Memberikan sebuah permission spesifik kepada suatu role dengan menambahkan data relasi pada tabel pivot RolePermission.",
+      description: "Memberikan sebuah permission spesifik kepada suatu role. Isi path parameter id dengan ID role, lalu isi body permissionId dengan ID permission.",
     },
   })
 
@@ -152,8 +158,8 @@ export const roleRoutes = new Elysia({ prefix: "/roles" })
   }, {
     beforeHandle: rbacGuard("ASSIGN_PERMISSION"),
     params: t.Object({
-      id: t.String({ description: "UUID dari role induk" }),
-      permissionId: t.String({ description: "UUID dari permission yang akan dicabut" }),
+      id: t.String({ description: "UUID role induk" }),
+      permissionId: t.String({ description: "UUID permission yang akan dicabut" }),
     }),
     detail: {
       tags: ["Roles"],
