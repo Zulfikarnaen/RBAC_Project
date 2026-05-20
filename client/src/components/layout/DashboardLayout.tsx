@@ -1,8 +1,10 @@
 import { ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { getPrimaryRole } from "@/utils/authRole";
 
 export const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { user, handleLogout } = useAuth();
+  const primaryRole = getPrimaryRole(user?.roles) ?? "UNKNOWN";
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -11,7 +13,7 @@ export const DashboardLayout = ({ children }: { children: ReactNode }) => {
         <h1 className="text-xl font-bold mb-10 text-blue-400">RBAC System</h1>
         <nav className="space-y-2">
           <a href="/dashboard" className="block p-2 hover:bg-slate-800 rounded">Beranda</a>
-          <p className="text-xs text-gray-500 mt-4 uppercase">Role: {user?.roles[0]}</p>
+          <p className="text-xs text-gray-500 mt-4 uppercase">Role: {primaryRole}</p>
         </nav>
       </aside>
 

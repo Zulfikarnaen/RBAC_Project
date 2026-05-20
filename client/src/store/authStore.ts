@@ -1,6 +1,7 @@
 // src/store/authStore.ts
 import { create } from "zustand";
 import type { User, AuthState } from "@/types/auth.types";
+import { normalizePermissions, normalizeRoles } from "@/utils/authRole";
 
 interface AuthActions {
   login: (user: User, token: string) => void;
@@ -13,7 +14,12 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => {
     try {
       const savedUser = localStorage.getItem("user");
       if (!savedUser) return null;
-      return JSON.parse(savedUser);
+      const parsedUser = JSON.parse(savedUser) as User;
+      return {
+        ...parsedUser,
+        roles: normalizeRoles(parsedUser.roles),
+        permissions: normalizePermissions(parsedUser.permissions),
+      };
     } catch (error) {
       console.error("Gagal parse data user dari localStorage:", error);
       localStorage.removeItem("user"); // Bersihkan jika datanya korup/rusak
