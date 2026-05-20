@@ -3,6 +3,7 @@ import type { Isitory } from "../../domain/repositories/IUserRepository";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "rahasia_enterprise_default";
+const ROLE_PRIORITY = ["SUPERADMIN", "ADMIN", "MANAGER", "EDITOR", "USER"];
 
 export class AuthUsecase {
   constructor(private userRepository: IUserRepository) {}
@@ -61,11 +62,17 @@ export class AuthUsecase {
     // 4. Ekstrak & Flatten data Roles dan Permissions dari database Prisma
     // Karena relasinya bertingkat (User -> UserRole -> Role -> RolePermission -> Permission), 
     // kita petakan (map) nilainya menjadi array string/object yang bersih untuk Frontend.
-    const roles = user.roles.map((ur: any) => ur.role.name);
+    const userRoleNames = new Set(user.roles.map((ur: any) => ur.role.name));
+    const roles = [
+      ...ROLE_PRIORITY.filter((role) => userRoleNames.has(role)),
+      ...Array.from(userRoleNames).filter((role) => !ROLE_PRIORITY.includes(role as string)),
+    ];
     
-    const permissions = user.roles.flatMap((ur: any) => 
-      ur.role.permissions.map((rp: any) => rp.permission.name)
-    );
+    const permissions = Array.from(new Set(
+      user.roles.flatMap((ur: any) => 
+        ur.role.permissions.map((rp: any) => rp.permission.name)
+      )
+    ));
 
     // 5. Kembalikan response lengkap sesuai kebutuhan frontend
     return {

@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/store/authStore";
 import { authService } from "@/services/authService";
-import type { Role, Permission, User } from "@/types/auth.types";
+import { normalizePermissions, normalizeRoles } from "@/utils/authRole";
+import type { User } from "@/types/auth.types";
 
 export function useAuth() {
   const { user, token, isAuthenticated, login, logout } = useAuthStore();
@@ -16,16 +17,8 @@ export function useAuth() {
         id: userData.id,
         username: userData.username || userData.email.split('@')[0], // Fallback nama dari email
         email: userData.email,
-        // PERBAIKAN DISINI: Mapping data role agar jadi string/format yang benar
-        roles: (userData.roles || []).map((r: any) => {
-          if (typeof r === 'string') return r;
-          // Jika r adalah object relasi dari Prisma (UserRole -> Role)
-          return r.role?.name || r.name || "USER";
-        }) as Role[],
-        // Sama dengan permission, pastikan ambil nama/slugnya saja
-        permissions: (userData.permissions || []).map((p: any) => {
-          return typeof p === 'string' ? p : (p.permission?.name || p.name || p.slug);
-        }) as Permission[],
+        roles: normalizeRoles(userData.roles),
+        permissions: normalizePermissions(userData.permissions),
       };
 
       login(user, res.data.token);
